@@ -59,7 +59,7 @@ public class App
             }
             catch (SQLException sqle)
             {
-                System.out.println("Failed to connect to database attempt " + Integer.toString(i));
+                System.out.println("Failed to connect to database attempt " + i);
                 System.out.println(sqle.getMessage());
             }
             catch (InterruptedException ie)
@@ -96,9 +96,14 @@ public class App
             Statement stmt = con.createStatement();
             // Create string for SQL statement
             String strSelect =
-                    "SELECT emp_no, first_name, last_name "
+                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary, departments.dept_name, dept_manager.emp_no, titles.title "
                             + "FROM employees "
-                            + "WHERE emp_no = " + ID;
+                            + "JOIN salaries ON employees.emp_no=salaries.emp_no "
+                            + "JOIN dept_emp ON employees.emp_no=dept_emp.emp_no "
+                            + "JOIN departments ON dept_emp.dept_no=departments.dept_no "
+                            + "JOIN dept_manager ON departments.dept_no=dept_manager.dept_no "
+                            + "JOIN titles ON employees.emp_no=titles.emp_no "
+                            + "WHERE employees.emp_no = " + ID;
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
             // Return new employee if valid.
@@ -106,9 +111,13 @@ public class App
             if (rset.next())
             {
                 Employee emp = new Employee();
-                emp.emp_no = rset.getInt("emp_no");
-                emp.first_name = rset.getString("first_name");
-                emp.last_name = rset.getString("last_name");
+                emp.emp_no = rset.getInt("employees.emp_no");
+                emp.first_name = rset.getString("employees.first_name");
+                emp.last_name = rset.getString("employees.last_name");
+                emp.salary= rset.getInt("salaries.salary");
+                emp.dept_name= rset.getString("departments.dept_name");
+                emp.emp_no= rset.getInt("dept_manager.emp_no");
+                emp.title= rset.getString("titles.title");
                 return emp;
             }
             else
@@ -136,4 +145,5 @@ public class App
                             + "Manager: " + emp.manager + "\n");
         }
     }
+
 }
